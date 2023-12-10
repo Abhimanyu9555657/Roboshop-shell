@@ -12,7 +12,7 @@ unzip /tmp/user.zip
 cd /app
 npm install
 dnf install mongodb-org-shell -y
-mongo --host MONGODB-SERVER-IPADDRESS </app/schema/user.js
+mongo --host mongodb.rdevops57online.com </app/schema/user.js
 systemctl daemon-reload
 systemctl enable user
 systemctl start user
