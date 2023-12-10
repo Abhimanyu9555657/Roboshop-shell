@@ -1,7 +1,7 @@
 cp cart.service /etc/systemd/system/cart.service
 
-curl -sL https://rpm.nodesource.com/setup_lts.x |bash
-
+dnf module disable nodejs -y
+dnf module enable nodejs:18 -y
 dnf install nodejs -y
 useradd roboshop
 mkdir /app
@@ -15,3 +15,4 @@ npm install
 systemctl daemon-reload
 systemctl enable cart
 systemctl restart cart
+
