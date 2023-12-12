@@ -39,3 +39,4 @@ echo -e "\e[36m>>>>>>>> Starting Catalogue Service <<<<<<<<\e[0m"
 systemctl daemon-reload
 systemctl enable catalogue
 systemctl start catalogue
+
