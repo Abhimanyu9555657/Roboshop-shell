@@ -11,7 +11,7 @@ func_appreq() {
   mkdir /app &>>${log}
 
   echo -e "\e[36m>>>>>>>> Download Application Content <<<<<<<<<\e[0m"
-  curl -L -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip
+  curl -L -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip &>>${log}
 
   echo -e "\e[36m>>>>>>>> Extract Application Content <<<<<<<<<\e[0m"
   cd /app
@@ -19,7 +19,7 @@ func_appreq() {
   cd /app
 }
 
-func-systemd() {
+func_systemd() {
   echo -e "\e[36m>>>>>>>> Start ${component} Service <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
   systemctl daemon-reload &>>${log}
   systemctl enable ${component} &>>${log}
