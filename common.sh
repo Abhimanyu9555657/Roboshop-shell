@@ -34,7 +34,7 @@ echo -e "\e[36m>>>>>>>> Installing Mongodb Client <<<<<<<<\e[0m"
 dnf install mongodb-org-shell -y &>>/tmp/roboshop.log
 
 echo -e "\e[36m>>>>>>>> Downloading ${component} Schema <<<<<<<<\e[0m"
-mongo --host mongodb.rdevops57online.com </app/schema/user.js &>>/tmp/roboshop.log
+mongo --host mongodb.rdevops57online.com </app/schema/{component}.js &>>/tmp/roboshop.log
 
 echo -e "\e[36m>>>>>>>> Starting ${component} Service <<<<<<<<\e[0m"
 systemctl daemon-reload &>>/tmp/roboshop.log
