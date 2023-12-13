@@ -1,43 +1,77 @@
-nodejs () {
-echo -e "\e[36m>>>>>>>> Create ${component} Service <<<<<<<<\e[0m"
-cp ${component}.service /etc/systemd/system/${component}.service &>>/tmp/roboshop.log
+log=tmp/roboshop.log
 
-echo -e "\e[36m>>>>>>>> Mongodb Repo <<<<<<<<\e[0m"
-cp mongo.repo /etc/yum.repos.d/mongo.repo &>>/tmp/roboshop.log
+func_appreq() {
+  echo -e "\e[36m>>>>>>>> Create Application User <<<<<<<<<\e[0m"
+  useradd roboshop &>>${log}
 
-echo -e "\e[36m>>>>>>>> Install Nodejs Repos <<<<<<<<\e[0m"
-dnf module disable nodejs -y &>>/tmp/roboshop.log
-dnf module enable nodejs:18 -y &>>/tmp/roboshop.log
-dnf install nodejs -y &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Cleanup Existing Application Content <<<<<<<<<\e[0m"
+  rm -rf /app &>>${log}
 
-echo -e "\e[36m>>>>>>>> Creating Application user <<<<<<<<\e[0m"
-${component}add roboshop &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Create Application Directory <<<<<<<<<\e[0m"
+  mkdir /app &>>${log}
 
-echo -e "\e[36m>>>>>>>>  Deleting Old Content <<<<<<<<\e[0m"
-rm -rf /app &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Download Application Content <<<<<<<<<\e[0m"
+  curl -L -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip
 
-echo -e "\e[36m>>>>>>>> Creating Application Directory <<<<<<<<\e[0m"
-mkdir /app &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Extract Application Content <<<<<<<<<\e[0m"
+  cd /app
+  unzip /tmp/${component}.zip &>>${log}
+  cd /app
+}
 
-echo -e "\e[36m>>>>>>>> Downloading Application Content <<<<<<<<\e[0m"
-curl -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip &>>/tmp/roboshop.log
+func-systemd() {
+  echo -e "\e[36m>>>>>>>> Start ${component} Service <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
+  systemctl daemon-reload &>>${log}
+  systemctl enable ${component} &>>${log}
+  systemctl restart ${component} &>>${log}
+}
 
-echo -e "\e[36m>>>>>>>> Extracting Application Content <<<<<<<<\e[0m"
-cd /app &>>/tmp/roboshop.log
-unzip /tmp/${component}.zip &>>/tmp/roboshop.log
-cd /app &>>/tmp/roboshop.log
+func_nodejs() {
+  log=/tmp/roboshop.log
 
-echo -e "\e[36m>>>>>>>> Downloading Nodejs Dependency <<<<<<<<\e[0m"
-npm install &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Create ${component} Service <<<<<<<<\e[0m"
+  cp ${component}.service /etc/systemd/system/${component}.service &>>${log}
 
-echo -e "\e[36m>>>>>>>> Installing Mongodb Client <<<<<<<<\e[0m"
-dnf install mongodb-org-shell -y &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Create Mongodb Repo <<<<<<<<\e[0m"
+  cp mongo.rep /etc/yum.repos.d/mongo.repo &>>${log}
 
-echo -e "\e[36m>>>>>>>> Downloading ${component} Schema <<<<<<<<\e[0m"
-mongo --host mongodb.rdevops57online.com </app/schema/${component}.js &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Install NodeJS Repos <<<<<<<<\e[0m"
+  curl -sL https://rpm.nodesource.com/setup_lts.x bash &>>${log}
 
-echo -e "\e[36m>>>>>>>> Starting ${component} Service <<<<<<<<\e[0m"
-systemctl daemon-reload &>>/tmp/roboshop.log
-systemctl enable ${component} &>>/tmp/roboshop.log
-systemctl start ${component} &>>/tmp/roboshop.log
+  echo -e "\e[36m>>>>>>>> Install NodeJS <<<<<<<<\e[0m"
+  yum install nodejs -y &>>${log}
+
+  func_appreq
+
+  echo -e "\e[36m>>>>>>>> Download NodeJS Dependency <<<<<<<<\e[0m"
+  npm install &>>${log}
+
+  echo -e "\e[36m>>>>>>>> Install Mongo Client <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
+  yum install mongodb-org-shell -y &>>${log}
+
+  echo -e "\e[36m>>>>>>>> Load User Schema <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
+  mongo --host mongodb.rdevops57online.com </app/schema/${component}.js &>>${log}
+
+  func_systemd
+}
+
+func_java() {
+ echo -e "\e[36m>>>>>>>> Create ${component} Service <<<<<<<<\e[0m"
+ cp ${component}.service /etc/systemd/system/${component}.service &>>${log}
+
+ echo -e "\e[36m>>>>>>>> Install Maven <<<<<<<<\e[0m"
+ yum install maven -y &>>${log}
+
+func_appreq
+
+ echo -e "\e[36m>>>>>>>> Build ${component} Service <<<<<<<<\e[0m"
+ mvn clean package &>>${log}
+ mv target/${component}-1.0.jar ${component}.jar
+
+ echo -e "\e[36m>>>>>>>> Install Mysql Client <<<<<<<<\e[0m"
+ yum install mysql -y &>>${log}
+
+ echo -e "\e[36m>>>>>>>> Load Schema <<<<<<<<\e[0m"
+ mysql -h mysql.rdevops57online.com -uroot -pRoboshop@1 </app/schema/${component}.sql &>>${log}
+ function_systemd
 }
