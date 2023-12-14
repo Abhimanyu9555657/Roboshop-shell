@@ -115,7 +115,10 @@ func_python() {
  cp ${component}.service /etc/systemd/system/${component}.service &>>${log}
  yum install python36 gcc python3-devil -y &>>${log}
  func_exit_status
+
  func_appreq
+
+ sed i "s/rabbitmq_app_password/${rabbitmq_app_password}/" /etc/systemd/system/${component}.service
 
  echo -e "\e[36m>>>>>>>> Build ${component} Service <<<<<<<<\e[0m"
  pip3.6 install -r requirement.txt &>>${log}
