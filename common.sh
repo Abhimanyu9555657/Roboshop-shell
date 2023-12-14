@@ -7,14 +7,17 @@ func_exit_status() {
       echo -e "\e[31m Failure \e[0m"
   fi
 }
+
 func_appreq() {
   echo -e "\e[36m>>>>>>>> Create ${component} Service <<<<<<<<<\e[0m"
   cp ${component}.service /etc/systemd/system/${component}.service app &>>${log}
   func_exit_status
 
   echo -e "\e[36m>>>>>>>> Create Application User <<<<<<<<<\e[0m"
-  func_exit_status
-  useradd roboshop &>>${log}
+  id roboshop &>>${log}
+  if [ $? -ne 0 ]; then
+    useradd roboshop &>>${log}
+  fi
   func_exit_status
 
   echo -e "\e[36m>>>>>>>> Cleanup Existing Application Content <<<<<<<<<\e[0m"
