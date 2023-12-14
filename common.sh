@@ -70,7 +70,7 @@ func_schema_setup() {
 
 }
 
-  func_nodejs() {
+func_nodejs() {
   log=/tmp/roboshop.log
   echo $?
 
@@ -119,7 +119,7 @@ func_appreq
  func_systemd
 }
 
- func_python() {
+func_python() {
 
  cp ${component}.service /etc/systemd/system/${component}.service &>>${log}
  echo $?
