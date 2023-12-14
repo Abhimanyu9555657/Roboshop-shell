@@ -25,20 +25,16 @@ func_appreq() {
   func_exit_status
 
   echo -e "\e[36m>>>>>>>> Create Application Directory <<<<<<<<<\e[0m"
-  func_exit_status
   mkdir /app &>>${log}
   func_exit_status
 
   echo -e "\e[36m>>>>>>>> Download Application Content <<<<<<<<<\e[0m"
-  func_exit_status
   curl -L -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip &>>${log}
+  func_exit_status
+
   echo -e "\e[36m>>>>>>>> Extract Application Content <<<<<<<<<\e[0m"
-  func_exit_status
   cd /app
-  func_exit_status
   unzip /tmp/${component}.zip &>>${log}
-  echo $?
-  cd /app
   func_exit_status
 }
 
@@ -55,8 +51,8 @@ func_schema_setup() {
     echo -e "\e[36m>>>>>>>> Install Mongo Client <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
     yum instal mongodb-org-shell -y &>>${log}
     func_exit_status
+
     echo -e "\e[36m>>>>>>>> Load User Schema <<<<<<<<\e[0m" | tee -a /tmp/roboshop.log
-    func_exit_status
     mongo --host mongodb.rdevops57online.com </app/schema/${component}.js &>>${log}
     func_exit_status
  fi
@@ -75,6 +71,7 @@ func_schema_setup() {
 
 func_nodejs() {
   log=/tmp/roboshop.log
+
   echo -e "\e[36m>>>>>>>> Create Mongodb Repo <<<<<<<<\e[0m"
   cp mongo.rep /etc/yum.repos.d/mongo.repo &>>${log}
   func_exit_status
@@ -86,7 +83,6 @@ func_nodejs() {
   echo -e "\e[36m>>>>>>>> Install NodeJS <<<<<<<<\e[0m"
   yum install nodejs -y &>>${log}
   func_exit_status
-
 
   func_appreq
 
@@ -104,11 +100,10 @@ func_java() {
  yum install maven -y &>>${log}
  func_exit_status
 
-func_appreq
+ func_appreq
 
  echo -e "\e[36m>>>>>>>> Build ${component} Service <<<<<<<<\e[0m"
  mvn clean package &>>${log}
- func_exit_status
  mv target/${component}-1.0.jar ${component}.jar
  func_exit_status
 
